@@ -23,7 +23,7 @@ wheels = [
 ]
 
 [[package]]
-name = "project-name"
+name = "toolbox"
 version = "0.0.0"
 source = { virtual = "." }
 
