@@ -1,0 +1,27 @@
+ls:
+  .d.ts: kebab-case
+  .generated.ts: kebab-case
+  .js: kebab-case
+  .md: kebab-case
+  .spec.ts: kebab-case
+  .ts: kebab-case
+
+ignore:
+  - .agents
+  - .angular/cache
+  - .cache
+  - .claude
+  - .git
+  - .github/ISSUE_TEMPLATE
+  - .github/pull_request_template.md
+  - .pnpm-store
+  - .venv
+  - .worktrees
+  - AGENTS.md
+  - CODE_OF_CONDUCT.md
+  - dist
+  - node_modules
+  - README.md
+  - SECURITY.md
+  - test/e2e/node_modules
+  - vitest.config.ts

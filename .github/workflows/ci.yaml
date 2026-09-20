@@ -1,7 +1,5 @@
 name: CI
 
-permissions: {}
-
 on:
   push:
     branches: [main]
@@ -13,21 +11,124 @@ concurrency:
   group: '${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}'
   cancel-in-progress: true
 
+env:
+  DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_HUB_USER }}/${{ github.event.repository.name }}
+  UV_LOCKED: 1
+  UV_NO_PROGRESS: 1
+
 jobs:
-  lint:
+  lint_commitlint:
+    name: lint - commitlint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff
+      - &checkout_full_history
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - &setup-just
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
+
+      - &setup-pnpm
+        uses: pnpm/setup@c9883cc79df532ad1a7b81bf9ab944ceb090d65c # v7.0.0
+        with:
+          cache: true
+
+      - *checkout_full_history
+      - *setup-just
+      - *setup-pnpm
+
+      - name: lint - commitlint (commit)
+        run: just lint__commitlint_last
+
+      - name: lint - commitlint (pr)
+        if: github.event_name == 'pull_request'
+        run: just lint__commitlint_pr ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
+
+  lint_eslint:
+    name: lint - eslint
+    runs-on: ubuntu-latest
+    steps:
+      - &checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - *checkout
+      - *setup-just
+      - *setup-pnpm
+
+      - run: just lint__eslint
+
+  lint_fmt:
+    name: lint - fmt
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *setup-just
+      - *setup-pnpm
+
+      - run: just fmt_check
+
+  lint_ls:
+    name: lint - ls
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *setup-just
+      - *setup-pnpm
+
+      - run: just lint__ls
+
+  lint_prek:
+    name: lint - prek
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *setup-pnpm
+
+      - uses: j178/prek-action@e98a699c41eb69ab013a45817a0406469a748f8d # v2.0.5
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: extractions/setup-just@v4
+      - *checkout_full_history
+      - *setup-just
+      - *setup-pnpm
+
+      - run: just test
+
+      - uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff
+      - *checkout
+      - *setup-just
+      - *setup-pnpm
+
+      - run: just build
+
+  docker-build:
+    name: build - docker
+    needs: [lint_commitlint, lint_eslint, lint_fmt, lint_ls, lint_prek, test, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        if: ${{ false && github.ref == 'refs/heads/main'}}
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PAT }}
+
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        id: docker_metadata
+        with:
+          images: ${{env.DOCKER_IMAGE_NAME}}
+
+      - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          push: ${{ false && github.ref == 'refs/heads/main' }}
+          tags: ${{ steps.docker_metadata.outputs.tags }}
+          labels: ${{ steps.docker_metadata.outputs.labels }}
