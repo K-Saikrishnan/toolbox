@@ -5,7 +5,7 @@
     "pedantic": "warn",
     "perf": "error",
     "restriction": "error",
-    "style": "error",
+    "style": "off",
     "suspicious": "warn"
   },
   "env": {
@@ -17,7 +17,7 @@
   "options": {
     "typeAware": true,
     "denyWarnings": true,
-    "reportUnusedDisableDirectives": "deny"
+    "reportUnusedDisableDirectives": "error"
   },
   "plugins": ["import", "jsdoc", "jsx-a11y", "node", "oxc", "promise", "typescript", "unicorn", "vitest"],
   "rules": {
@@ -29,6 +29,20 @@
       {
         "maxDepth": 3
       }
-    ]
-  }
+    ],
+    "oxc/no-async-await": "off",
+    "oxc/no-optional-chaining": "off",
+    "no-magic-numbers": "error",
+    "vitest/require-test-timeout": "off",
+    "vitest/valid-title": "off"
+  },
+
+  "overrides": [
+    {
+      "files": ["**/*.spec.ts"],
+      "rules": {
+        "typescript/no-unsafe-type-assertion": "off"
+      }
+    }
+  ]
 }

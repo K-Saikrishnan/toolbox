@@ -1,17 +1,13 @@
 [project]
-name = "PROJECT_NAME"
+name = "toolbox"
 version = "0.0.0"
 readme = "README.md"
-authors = [
-  { name = "K-Saikrishnan", email = "53394202+K-Saikrishnan@users.noreply.github.com" },
-]
+authors = [{ name = "K-Saikrishnan", email = "53394202+K-Saikrishnan@users.noreply.github.com" }]
 requires-python = "==3.14.7"
 dependencies = []
 
 [dependency-groups]
-dev = [
-    "prek==0.5.3",
-]
+dev = ["prek==0.5.3", "typos==1.50.1"]
 
 [tool.uv]
 add-bounds = "exact"
@@ -32,15 +28,15 @@ ignore = [
   # Recommended to disable
   "COM812", # missing-trailing-comma
   "COM819", # prohibited-trailing-comma
-  "D206",   # docstring-tab-indentation
-  "D207",   # under-indentation
-  "D208",   # over-indentation
-  "D300",   # triple-single-quotes
-  "E111",   # indentation-with-invalid-multiple
-  "E114",   # indentation-with-invalid-multiple-comment
-  "E117",   # over-indented
-  "Q",      # flake8-quotes
-  "W191",   # tab-indentation
+  "D206", # docstring-tab-indentation
+  "D207", # under-indentation
+  "D208", # over-indentation
+  "D300", # triple-single-quotes
+  "E111", # indentation-with-invalid-multiple
+  "E114", # indentation-with-invalid-multiple-comment
+  "E117", # over-indented
+  "Q", # flake8-quotes
+  "W191", # tab-indentation
 
   "D100", # undocumented-public-module
   "D101", # undocumented-public-class

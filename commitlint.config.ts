@@ -1,4 +1,4 @@
-// oxlint-disable import/no-anonymous-default-export import/no-default-export
+// oxlint-disable import/no-default-export
 
 enum Level {
   // oxlint-disable-next-line no-magic-numbers
